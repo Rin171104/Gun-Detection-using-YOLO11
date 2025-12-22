@@ -1,0 +1,14 @@
+artifact_uri: file:D:/HocPython/deep learning/Computer Vision/gun detection/runs/mlflow/623991071833487009/7afac334d0ba434cb4282db286d30303/artifacts
+end_time: 1766345127981
+entry_point_name: ''
+experiment_id: '623991071833487009'
+lifecycle_stage: active
+run_id: 7afac334d0ba434cb4282db286d30303
+run_name: gun_detector2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1766344882586
+status: 3
+tags: []
+user_id: PC

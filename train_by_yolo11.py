@@ -2,23 +2,22 @@ from ultralytics import YOLO
 import multiprocessing as mp
 
 def main():
-    # Load YOLO11 pretrained model
     model = YOLO("models/yolo11n.pt")
 
-    # Train detection model
     model.train(
         data="gun_data.yaml",
-        epochs=10,
+        epochs=15,
         imgsz=640,
         batch=8,
         device=0,
-        workers=4,
+        workers=6,
         project="runs_gun",
-        name="gun_detector",
-        patience=20
+        name="gun_detector_tb",
+        exist_ok=True,
+        plots=True
     )
 
-    print("✅ TRAINING COMPLETED")
+    print(" Training finished")
 
 if __name__ == "__main__":
     mp.freeze_support()

@@ -1,47 +1,61 @@
 import cv2
+import argparse
 from ultralytics import YOLO
 
-model = YOLO(
-    r"D:\HocPython\deep learning\Computer Vision\gun detection\runs_gun\gun_detector\weights\best.pt"
-)
-cap = cv2.VideoCapture("video/gun_video1.mp4")
-assert cap.isOpened(), "❌ Không mở được video input"
 
-w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-fps = cap.get(cv2.CAP_PROP_FPS)
-
-out = cv2.VideoWriter(
-    "gun_detection_output.mp4",
-    cv2.VideoWriter_fourcc(*"mp4v"),
-    fps,
-    (w, h)
-)
+def parse_args():
+    parser = argparse.ArgumentParser(description="Test YOLO gun detection on video )")
+    parser.add_argument("--path","-p",type=str,required=True,help="Path to input video")
+    parser.add_argument("--output",type=str,default="gun_detection_output.mp4",help="Path to output video")
+    parser.add_argument("--conf",type=float,default=0.5,help="Confidence threshold")
+    parser.add_argument("--imgsz",type=int,default=640,help="Inference image size")
+    parser.add_argument("--device",type=str,default="0",help="Device: 0 for GPU, cpu for CPU")
+    parser.add_argument("--show",action="store_true",help="Show video while processing")
+    return parser.parse_args()
 
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+def main(args):
+    model = YOLO(r"D:\HocPython\deep learning\Computer Vision\gun detection\runs_gun\gun_detector_tb\weights\best.pt")
+    cap = cv2.VideoCapture(args.path)
+    if not cap.isOpened():
+        raise IOError(f" Cannot open video: {args.path}")
+    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    writer = cv2.VideoWriter(
+        args.output,
+        cv2.VideoWriter_fourcc(*"mp4v"),
+        fps,
+        (w, h)
+    )
 
-    # Detect gun
-    results = model(frame, conf=0.5)[0]
-    output_frame = results.plot()
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    # 👉 HIỂN THỊ
-    cv2.imshow("Gun Detection", output_frame)
+        results = model(
+            frame,
+            conf=args.conf,
+            imgsz=args.imgsz,
+            device=args.device
+        )[0]
 
-    # 👉 LƯU VIDEO
-    out.write(output_frame)
+        output_frame = results.plot()
+        writer.write(output_frame)
 
-    # ESC để thoát
-    if cv2.waitKey(1) & 0xFF == 27:
-        break
+        if args.show:
+            cv2.imshow("Gun Detection", output_frame)
+            if cv2.waitKey(1) & 0xFF == 27:  # ESC
+                break
 
-# ===============================
-# 5. RELEASE
-# ===============================
-cap.release()
-out.release()
-cv2.destroyAllWindows()
+    cap.release()
+    writer.release()
+    cv2.destroyAllWindows()
 
+    print(f" Done. Output saved to: {args.output}")
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    main(args)
